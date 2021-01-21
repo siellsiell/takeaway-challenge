@@ -1,3 +1,5 @@
+require 'twilio-ruby'
+
 class Menu
 
   @@dishes = [
@@ -32,7 +34,7 @@ class Menu
 end
 
 class Takeaway
-  def initialize(menu = Menu, texter = Texter)
+  def initialize(texter, menu = Menu)
     @menu = menu
     @texter = texter
   end
@@ -51,7 +53,7 @@ class Takeaway
       raise "Total is incorrect"
     end
 
-    @texter.send(delivery_time)
+    @texter.send_sms(delivery_time)
     puts "Success"
   end
 
@@ -69,11 +71,11 @@ end
 
 class Texter
 
-  def initialize(sms_client)
-    @sms_client = sms_client
+  def initialize(client)
+    @sms_client = client
   end
 
-  def send(delivery_time)
+  def send_sms(delivery_time)
     @sms_client.messages.create("+123", "+447",
       "Thank you! Your order was placed and will be delivered before " +
       "#{delivery_time.strftime("%R")}.")
