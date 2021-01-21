@@ -105,33 +105,37 @@ describe "Menu" do
   end
 end
 
+class FakeMessages
+  def initialize
+    @sms = []
+  end
+  def create(from, to, body)
+    @sms << {:from => from, :to => to, :body => body}
+  end
+  attr_reader :sms
+end
+
+class FakeTwilio
+  def initialize
+    @messages = FakeMessages.new
+  end
+  attr_reader :messages
+end
 
 describe Texter do
-
-  class FakeMessages
-    def initialize
-      @sms = []
-    end
-    def create(from, to, body)
-      @sms << {:from => from, :to => to, :body => body}
-    end
-    attr_reader :sms
-  end
-
-  class FakeTwilio
-    def initialize
-      @messages = FakeMessages.new
-    end
-    attr_reader :messages
-  end
-
-  it "calls the Twilio API to send an SMS" do
+  it "sends an SMS with the delivery time" do
     twilio = FakeTwilio.new
     texter = Texter.new(twilio)
-    texter.send(Time.new)
-    expect(twilio.messages.sms).to eq([{:from => "+123", :to => "+447", :body => "Hey"}])
-  end
+    delivery_time = Time.new(2020, 1, 1, 13, 23)
 
+    texter.send(delivery_time)
+
+    expect(twilio.messages.sms).to eq([{
+      :from => "+123",
+      :to => "+447",
+      :body => "Thank you! Your order was placed and will be delivered before 13:23."
+    }])
+  end
 end
 
 describe "IntegrationTest" do

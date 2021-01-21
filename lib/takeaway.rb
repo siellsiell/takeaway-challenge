@@ -74,7 +74,9 @@ class Texter
   end
 
   def send(delivery_time)
-    @sms_client.messages.create("+123", "+447", "Hey")
+    @sms_client.messages.create("+123", "+447",
+      "Thank you! Your order was placed and will be delivered before " +
+      "#{delivery_time.strftime("%R")}.")
   end
 end
 
