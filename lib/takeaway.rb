@@ -34,7 +34,7 @@ class Menu
 end
 
 class Takeaway
-  def initialize(texter, menu = Menu)
+  def initialize(texter:, menu: Menu)
     @menu = menu
     @texter = texter
   end
@@ -71,7 +71,7 @@ end
 
 class Texter
 
-  def initialize(client)
+  def initialize(client = Twilio::REST::Client.new)
     @sms_client = client
   end
 

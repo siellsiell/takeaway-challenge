@@ -6,7 +6,7 @@ describe "Takeaway" do
     it "prints menu" do
       menu_mock = class_double("Menu", :list => "stuff", :valid_order? => true)
       texter_mock = instance_double("Texter", :send_sms => nil)
-      takeaway = Takeaway.new(texter_mock, menu_mock)
+      takeaway = Takeaway.new(texter: texter_mock, menu: menu_mock)
       allow(takeaway).to receive(:gets).and_return("1 1 1 20\n")
 
       expect { takeaway.order() }.to output(/stuff\n/).to_stdout
@@ -15,7 +15,7 @@ describe "Takeaway" do
     it "asks user to order" do
       menu_mock = class_double("Menu", :list => "stuff", :valid_order? => true)
       texter_mock = instance_double("Texter", :send_sms => nil)
-      takeaway = Takeaway.new(texter_mock, menu_mock)
+      takeaway = Takeaway.new(texter: texter_mock, menu: menu_mock)
       allow(takeaway).to receive(:gets).and_return("1 1 1 20\n")
 
       expect { takeaway.order() }.to output(
@@ -26,7 +26,7 @@ describe "Takeaway" do
     it "allows user to order and sends text when total is correct" do
       menu_mock = class_double("Menu", :list => "stuff", :valid_order? => true)
       texter_mock = instance_double("Texter", :send_sms => nil)
-      takeaway = Takeaway.new(texter_mock, menu_mock)
+      takeaway = Takeaway.new(texter: texter_mock, menu: menu_mock)
       allow(takeaway).to receive(:gets).and_return("1 1 1 20\n")
 
       takeaway.order()
@@ -37,7 +37,7 @@ describe "Takeaway" do
     it "if ordering at midnight the text should be sent with delivery time at 1am" do
       menu_mock = class_double("Menu", :list => "stuff", :valid_order? => true)
       texter_mock = instance_double("Texter", :send_sms => nil)
-      takeaway = Takeaway.new(texter_mock, menu_mock)
+      takeaway = Takeaway.new(texter: texter_mock, menu: menu_mock)
       current_time = Time.new(2020, 1, 1)
       takeaway.stub(:current_time) { current_time }
       allow(takeaway).to receive(:gets).and_return("1 1 1 20\n")
@@ -50,7 +50,7 @@ describe "Takeaway" do
     it "if ordering at 1pm the text should be sent with delivery time at 2pm" do
       menu_mock = class_double("Menu", :list => "stuff", :valid_order? => true)
       texter_mock = instance_double("Texter", :send_sms => nil)
-      takeaway = Takeaway.new(texter_mock, menu_mock)
+      takeaway = Takeaway.new(texter: texter_mock, menu: menu_mock)
       current_time = Time.new(2020, 1, 1, 13, 0, 0)
       takeaway.stub(:current_time) { current_time }
       allow(takeaway).to receive(:gets).and_return("1 1 1 20\n")
@@ -63,7 +63,7 @@ describe "Takeaway" do
     it "allows user to order and raises error when total is incorrect" do
       menu_mock = class_double("Menu", :list => "stuff", :valid_order? => false)
       texter_mock = instance_double("Texter", :send_sms => nil)
-      takeaway = Takeaway.new(texter_mock, menu_mock)
+      takeaway = Takeaway.new(texter: texter_mock, menu: menu_mock)
       allow(takeaway).to receive(:gets).and_return("1 1 1 13\n")
 
       expect { takeaway.order() }.to raise_error(/Total is incorrect/)
@@ -141,7 +141,7 @@ end
 describe "IntegrationTest" do
   ["1 1 1 13", "1 0 3 11", "0 1 1 11"].each do |input|
     it "prints menu, allows user to order and returns success message when total is correct: #{input}" do
-      takeaway = Takeaway.new(Texter.new(FakeTwilio.new))
+      takeaway = Takeaway.new(texter: Texter.new(FakeTwilio.new))
       allow(takeaway).to receive(:gets).and_return("#{input}\n")
       expect { takeaway.order() }.to output(
         "1) Vitamins 2.00\n" + 
@@ -153,7 +153,7 @@ describe "IntegrationTest" do
     end
   end
   it "prints menu, allows user to order and raises error when total is incorrect" do
-    takeaway = Takeaway.new(Texter.new(FakeTwilio.new))
+    takeaway = Takeaway.new(texter: Texter.new(FakeTwilio.new))
     allow(takeaway).to receive(:gets).and_return("1 1 1 20\n")
     expect { takeaway.order() }.to output(
       "1) Vitamins 2.00\n" + 
