@@ -51,15 +51,30 @@ class Takeaway
       raise "Total is incorrect"
     end
 
-    @texter.send
+    @texter.send(delivery_time)
     puts "Success"
+  end
+
+  private
+
+  def delivery_time
+    current_time + 60 * 60
+  end
+
+  def current_time
+    Time.new
   end
 
 end
 
 class Texter
 
-  def self.send
+  def initialize(sms_client)
+    @sms_client = sms_client
+  end
+
+  def send(delivery_time)
+    @sms_client.messages.create("+123", "+447", "Hey")
   end
 end
 

@@ -34,6 +34,32 @@ describe "Takeaway" do
       expect(texter_mock).to have_received(:send)
     end
 
+    it "if ordering at midnight the text should be sent with delivery time at 1am" do
+      menu_mock = class_double("Menu", :list => "stuff", :valid_order? => true)
+      texter_mock = class_double("Texter", :send => nil)
+      takeaway = Takeaway.new(menu_mock, texter_mock)
+      current_time = Time.new(2020, 1, 1)
+      takeaway.stub(:current_time) { current_time }
+      allow(takeaway).to receive(:gets).and_return("1 1 1 20\n")
+
+      takeaway.order()
+
+      expect(texter_mock).to have_received(:send).with(Time.new(2020, 1, 1, 1, 0, 0))
+    end
+
+    it "if ordering at 1pm the text should be sent with delivery time at 2pm" do
+      menu_mock = class_double("Menu", :list => "stuff", :valid_order? => true)
+      texter_mock = class_double("Texter", :send => nil)
+      takeaway = Takeaway.new(menu_mock, texter_mock)
+      current_time = Time.new(2020, 1, 1, 13, 0, 0)
+      takeaway.stub(:current_time) { current_time }
+      allow(takeaway).to receive(:gets).and_return("1 1 1 20\n")
+
+      takeaway.order()
+
+      expect(texter_mock).to have_received(:send).with(Time.new(2020, 1, 1, 14, 0, 0))
+    end
+
     it "allows user to order and raises error when total is incorrect" do
       menu_mock = class_double("Menu", :list => "stuff", :valid_order? => false)
       texter_mock = class_double("Texter", :send => nil)
@@ -77,6 +103,35 @@ describe "Menu" do
       expect(Menu.valid_order?([0, 1, 0], 100)).to be false
     end
   end
+end
+
+
+describe Texter do
+
+  class FakeMessages
+    def initialize
+      @sms = []
+    end
+    def create(from, to, body)
+      @sms << {:from => from, :to => to, :body => body}
+    end
+    attr_reader :sms
+  end
+
+  class FakeTwilio
+    def initialize
+      @messages = FakeMessages.new
+    end
+    attr_reader :messages
+  end
+
+  it "calls the Twilio API to send an SMS" do
+    twilio = FakeTwilio.new
+    texter = Texter.new(twilio)
+    texter.send(Time.new)
+    expect(twilio.messages.sms).to eq([{:from => "+123", :to => "+447", :body => "Hey"}])
+  end
+
 end
 
 describe "IntegrationTest" do
