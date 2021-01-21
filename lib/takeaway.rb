@@ -6,6 +6,7 @@ class Menu
     { :name => :Calcium, :price => 3 },
   ]
 
+  # todo move formatting to Takeaway
   def self.list
     @@dishes.map.with_index { |dish, index|
       format("%<number>s) %<name>s %<price>.2f", number: index + 1,
@@ -31,8 +32,9 @@ class Menu
 end
 
 class Takeaway
-  def initialize(menu = Menu)
+  def initialize(menu = Menu, texter = Texter)
     @menu = menu
+    @texter = texter
   end
 
   def order
@@ -49,7 +51,15 @@ class Takeaway
       raise "Total is incorrect"
     end
 
+    @texter.send
     puts "Success"
   end
 
 end
+
+class Texter
+
+  def self.send
+  end
+end
+

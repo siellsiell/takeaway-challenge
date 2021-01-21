@@ -1,27 +1,48 @@
-require 'Takeaway'
-require 'Menu'
+require 'takeaway'
 
 describe "Takeaway" do
   describe "#order" do
-    it "prints menu, allows user to order and returns success message when total is correct" do
+
+    it "prints menu" do
       menu_mock = class_double("Menu", :list => "stuff", :valid_order? => true)
-      takeaway = Takeaway.new(menu_mock)
+      texter_mock = class_double("Texter", :send => nil)
+      takeaway = Takeaway.new(menu_mock, texter_mock)
       allow(takeaway).to receive(:gets).and_return("1 1 1 20\n")
+
+      expect { takeaway.order() }.to output(/stuff\n/).to_stdout
+    end
+
+    it "asks user to order" do
+      menu_mock = class_double("Menu", :list => "stuff", :valid_order? => true)
+      texter_mock = class_double("Texter", :send => nil)
+      takeaway = Takeaway.new(menu_mock, texter_mock)
+      allow(takeaway).to receive(:gets).and_return("1 1 1 20\n")
+
       expect { takeaway.order() }.to output(
-        "stuff\n" +
-        "Please enter the quantities for each dish: " +
-        "Success\n"
+        /Please enter the quantities for each dish/
       ).to_stdout
     end
-    it "prints menu, allows user to order and raises error when total is incorrect" do
+
+    it "allows user to order and sends text when total is correct" do
+      menu_mock = class_double("Menu", :list => "stuff", :valid_order? => true)
+      texter_mock = class_double("Texter", :send => nil)
+      takeaway = Takeaway.new(menu_mock, texter_mock)
+      allow(takeaway).to receive(:gets).and_return("1 1 1 20\n")
+
+      takeaway.order()
+
+      expect(texter_mock).to have_received(:send)
+    end
+
+    it "allows user to order and raises error when total is incorrect" do
       menu_mock = class_double("Menu", :list => "stuff", :valid_order? => false)
+      texter_mock = class_double("Texter", :send => nil)
       takeaway = Takeaway.new(menu_mock)
       allow(takeaway).to receive(:gets).and_return("1 1 1 13\n")
-      expect { takeaway.order() }.to output(
-        "stuff\n" +
-        "Please enter the quantities for each dish: "
-      ).to_stdout
-       .and raise_error(/Total is incorrect/)
+
+      expect { takeaway.order() }.to raise_error(/Total is incorrect/)
+
+      expect(texter_mock).not_to have_received(:send)
     end
   end
 end
