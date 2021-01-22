@@ -1,6 +1,7 @@
 require 'twilio-ruby'
 
-#
+TWILIO_API_KEY = "AC8e9f8ff6a5a57ce87a2cc0739fd365ae"
+
 class Menu
 
   @@dishes = [
@@ -61,12 +62,18 @@ class Takeaway
     puts "Success"
   end
 
-  #def self.create
-  #  Takeaway.new(Texter(Twilio::REST::Client.new(
-  #    "AC8e9f8ff6a5a57ce87a2cc0739fd365ae",
-  #    ENV["TWILIO_AUTH_TOKEN"]
-  #  ), Menu))
-  #end
+  def self.create
+    Takeaway.new(
+      menu: Menu,
+      texter: Texter.new(
+        Twilio::REST::Client.new(
+          TWILIO_API_KEY,
+          ENV["TWILIO_AUTH_TOKEN"]
+        ),
+        ENV["TO_PHONE_NUMBER"]
+      )
+    )
+  end
 
   private
 
@@ -84,7 +91,6 @@ class Texter
 
   FROM_NUMBER = "+19842144030"
   def initialize(client, to_number)
-    puts client
     @sms_client = client
     @to_number = to_number
   end
