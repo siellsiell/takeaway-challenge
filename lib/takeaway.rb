@@ -1,6 +1,6 @@
 require 'twilio-ruby'
 
-TWILIO_API_KEY = "AC8e9f8ff6a5a57ce87a2cc0739fd365ae"
+TWILIO_ACCOUNT_SID = "AC8e9f8ff6a5a57ce87a2cc0739fd365ae"
 
 class Menu
 
@@ -10,7 +10,6 @@ class Menu
     { :name => :Calcium, :price => 3 },
   ]
 
-  # todo move formatting to Takeaway
   def self.list
     @@dishes.map.with_index { |dish, index|
       format("%<number>s) %<name>s %<price>.2f", number: index + 1,
@@ -36,9 +35,6 @@ class Menu
 end
 
 class Takeaway
-  # TODO possibly pass in texting client here too? or just the api keys?
-  # or add a static method to create a Takeaway class with all the right
-  # settings?
   def initialize(texter:, menu: Menu)
     @menu = menu
     @texter = texter
@@ -67,7 +63,7 @@ class Takeaway
       menu: Menu,
       texter: Texter.new(
         Twilio::REST::Client.new(
-          TWILIO_API_KEY,
+          TWILIO_ACCOUNT_SID,
           ENV["TWILIO_AUTH_TOKEN"]
         ),
         ENV["TO_PHONE_NUMBER"]
