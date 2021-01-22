@@ -61,6 +61,13 @@ class Takeaway
     puts "Success"
   end
 
+  #def self.create
+  #  Takeaway.new(Texter(Twilio::REST::Client.new(
+  #    "AC8e9f8ff6a5a57ce87a2cc0739fd365ae",
+  #    ENV["TWILIO_AUTH_TOKEN"]
+  #  ), Menu))
+  #end
+
   private
 
   def delivery_time
@@ -75,15 +82,17 @@ end
 
 class Texter
 
-  def initialize(client = Twilio::REST::Client.new)
-    # TODO read api keys from environment variables
+  FROM_NUMBER = "+19842144030"
+  def initialize(client, to_number)
+    puts client
     @sms_client = client
+    @to_number = to_number
   end
 
   def send_sms(delivery_time)
     @sms_client.messages.create(
-      from: "+123",
-      to: "+447",
+      from: FROM_NUMBER,
+      to: @to_number,
       body: "Thank you! Your order was placed and will be delivered before " +
       "#{delivery_time.strftime("%R")}.")
   end

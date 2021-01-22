@@ -125,14 +125,15 @@ end
 describe Texter do
   it "sends an SMS with the delivery time" do
     twilio = FakeTwilio.new
-    texter = Texter.new(twilio)
+    to_number = "+44123"
+    texter = Texter.new(twilio, to_number)
     delivery_time = Time.new(2020, 1, 1, 13, 23)
 
     texter.send_sms(delivery_time)
 
     expect(twilio.messages.sms).to eq([{
-      :from => "+123",
-      :to => "+447",
+      :from => "+19842144030",
+      :to => to_number,
       :body => "Thank you! Your order was placed and will be delivered before 13:23."
     }])
   end
@@ -141,7 +142,8 @@ end
 describe "IntegrationTest" do
   ["1 1 1 13", "1 0 3 11", "0 1 1 11"].each do |input|
     it "prints menu, allows user to order and returns success message when total is correct: #{input}" do
-      takeaway = Takeaway.new(texter: Texter.new(FakeTwilio.new))
+      twilio = FakeTwilio.new
+      takeaway = Takeaway.new(texter: Texter.new(twilio, "+44123"))
       allow(takeaway).to receive(:gets).and_return("#{input}\n")
       expect { takeaway.order() }.to output(
         "1) Vitamins 2.00\n" + 
@@ -150,10 +152,12 @@ describe "IntegrationTest" do
         "Please enter the quantities for each dish: " +
         "Success\n"
       ).to_stdout
+      expect(twilio.messages.sms).not_to be_empty
     end
   end
   it "prints menu, allows user to order and raises error when total is incorrect" do
-    takeaway = Takeaway.new(texter: Texter.new(FakeTwilio.new))
+    twilio = FakeTwilio.new
+    takeaway = Takeaway.new(texter: Texter.new(twilio, "+44123"))
     allow(takeaway).to receive(:gets).and_return("1 1 1 20\n")
     expect { takeaway.order() }.to output(
       "1) Vitamins 2.00\n" + 
@@ -162,5 +166,6 @@ describe "IntegrationTest" do
       "Please enter the quantities for each dish: "
     ).to_stdout
       .and raise_error(/Total is incorrect/)
+    expect(twilio.messages.sms).to be_empty
   end
 end
