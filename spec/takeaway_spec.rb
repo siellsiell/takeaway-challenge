@@ -109,7 +109,7 @@ class FakeMessages
   def initialize
     @sms = []
   end
-  def create(from, to, body)
+  def create(from:, to:, body:)
     @sms << {:from => from, :to => to, :body => body}
   end
   attr_reader :sms

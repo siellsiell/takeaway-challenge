@@ -1,5 +1,6 @@
 require 'twilio-ruby'
 
+#
 class Menu
 
   @@dishes = [
@@ -34,6 +35,9 @@ class Menu
 end
 
 class Takeaway
+  # TODO possibly pass in texting client here too? or just the api keys?
+  # or add a static method to create a Takeaway class with all the right
+  # settings?
   def initialize(texter:, menu: Menu)
     @menu = menu
     @texter = texter
@@ -72,12 +76,15 @@ end
 class Texter
 
   def initialize(client = Twilio::REST::Client.new)
+    # TODO read api keys from environment variables
     @sms_client = client
   end
 
   def send_sms(delivery_time)
-    @sms_client.messages.create("+123", "+447",
-      "Thank you! Your order was placed and will be delivered before " +
+    @sms_client.messages.create(
+      from: "+123",
+      to: "+447",
+      body: "Thank you! Your order was placed and will be delivered before " +
       "#{delivery_time.strftime("%R")}.")
   end
 end
